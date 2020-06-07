@@ -1,0 +1,16 @@
+{
+  "name": "qmk-indicator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/woofers/qmk-indicator",
+  "author": "Jaxson Van Doorn",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "esm": "^3.2.25",
+    "node-hid": "^1.2.0"
+  },
+  "scripts": {
+    "start": "node -r esm index.js"
+  }
+}
