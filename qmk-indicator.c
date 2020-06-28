@@ -15,7 +15,8 @@
 #define WAIT 250 * 1000
 #define PAYLOAD_SIZE 1
 
-typedef unsigned short us;
+typedef unsigned short ushort;
+typedef unsigned char byte;
 
 enum status {
   None=1,
@@ -88,7 +89,7 @@ int check_status() {
   return run_command(status);
 }
 
-hid_device* connect(us vendor_id, us product_id, int interface) {
+hid_device* connect(ushort vendor_id, ushort product_id, int interface) {
   struct hid_device_info *devs = hid_enumerate(0x0, 0x0);
   struct hid_device_info *cur_dev = devs;
   char* path = NULL;
@@ -120,19 +121,23 @@ int main(int argc, char* argv[]) {
   catch_sigterms();
   wchar_t manufacturer[MAX_STR];
   wchar_t product[MAX_STR];
-  char payload[PAYLOAD_SIZE];
+  byte payload[PAYLOAD_SIZE];
   hid_device *handle = connect(VENDOR_ID, PRODUCT_ID, INTERFACE);
+  byte last = None;
   if (!handle) return 1;
   hid_get_manufacturer_string(handle, manufacturer, MAX_STR);
   hid_get_product_string(handle, product, MAX_STR);
   printf("%s %ls %ls", "Reading from", manufacturer, product);
   hid_set_nonblocking(handle, 1);
   while (running) {
-    payload[0] = check_status();
-    int res = hid_write(handle, payload, sizeof(payload));
-    if (res < 0) {
-      printf("Unable to write()\n");
-      printf("Error: %ls\n", hid_error(handle));
+    payload[0] = (byte)check_status();
+    if (payload[0] != last) {
+      last = payload[0];
+      int res = hid_write(handle, payload, sizeof(payload));
+      if (res < 0) {
+        printf("Unable to write()\n");
+        printf("Error: %ls\n", hid_error(handle));
+      }
     }
     usleep(WAIT);
   }
